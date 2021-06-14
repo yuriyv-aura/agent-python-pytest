@@ -90,12 +90,22 @@ class PyTestServiceClass(with_metaclass(Singleton, object)):
                 endpoint=endpoint,
                 project=project,
                 token=uuid,
-                error_handler=self.async_error_handler,
+                error_handler=self.custom_error_handler,
                 log_batch_size=log_batch_size
             )
         else:
             log.debug('The pytest is already initialized')
         return self.RP
+
+    def custom_error_handler(self, exc_info):
+        """
+        This callback function will be called by async service client when error occurs.
+        Return True if error is not critical and you want to continue work.
+        :param exc_info: result of sys.exc_info() -> (type, value, traceback)
+        :return:
+        """
+        log.debug("Error occurred: {}".format(exc_info[1]))
+        traceback.print_exception(*exc_info)
 
     def async_error_handler(self, exc_info):
         self.terminate_service(nowait=True)
